@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import * as XLSX from "xlsx";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 type Politician = {
   [key: string]: string;
@@ -13,6 +13,7 @@ function App() {
   const [excelData, setExcelData] = useState<Politician[]>();
   let keyArr: string[] = [];
   if (excelData) keyArr = Object.keys(excelData[0]);
+
   const fileChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const file = e.target.files[0];
@@ -20,7 +21,6 @@ function App() {
   };
 
   console.log(excelData);
-  console.log(keyArr);
   const importFile = async (file: File) => {
     /* get data as an ArrayBuffer */
     const reader = new FileReader();
@@ -37,74 +37,104 @@ function App() {
     reader.readAsBinaryString(file);
   };
 
-  useEffect(() => {
-    if (!excelData) return;
-  }, [excelData]);
-
   return (
-    <>
+    <Wrapper>
       <h3>엑셀 업로드 테스트</h3>
-      {/* Import Button */}
       <input type="file" onChange={(e) => fileChangeHandler(e)} />
-
-      {/* Export Button */}
-      <button
-        onClick={() => {
-          /* Create worksheet from HTML DOM TABLE */
-          const table = document.getElementById("tabeller");
-          const wb = XLSX.utils.table_to_book(table);
-
-          /* Export to file (start a download) */
-          XLSX.writeFile(wb, "SheetJSIntro.xlsx");
-        }}
-      >
+      <button>
         <b>Export XLSX!</b>
       </button>
-
-      {excelData && (
-        <SheetWrapper>
-          <Label>
-            {keyArr.map((key) => (
-              <div>{key}</div>
-            ))}
-          </Label>
-          <div>
+      <SheetWrapper>
+        <Label>
+          {keyArr.map((key) => (
+            <div key={key}>{key}</div>
+          ))}
+        </Label>
+        {excelData && (
+          <List>
             {excelData.map((data) => (
-              <>
-                <img src={data[keyArr[0]]} alt="" />
-                <div>{data[keyArr[1]]}</div>
-                <div>{data[keyArr[2]]}</div>
-                <div>{data[keyArr[3]]}</div>
-                <div>{data[keyArr[4]]}</div>
-                <div>{data[keyArr[5]]}</div>
-                <div>{data[keyArr[6]]}</div>
-                <div>{data[keyArr[7]]}</div>
-                <div>{data[keyArr[8]]}</div>
-                <div>{data[keyArr[9]]}</div>
-                <div>{data[keyArr[10]]}</div>
-                <div>{data[keyArr[11]]}</div>
-                <div>{data[keyArr[12]]}</div>
-                <div>{data[keyArr[13]]}</div>
-              </>
+              <ListItem key={data["이름"]}>
+                <ProfileWrapper>
+                  <Profile src={data[keyArr[0]]} />
+                </ProfileWrapper>
+                {keyArr.slice(1).map((key) => (
+                  <ListItemData key={key}>{data[key]}</ListItemData>
+                ))}
+              </ListItem>
             ))}
-          </div>
-        </SheetWrapper>
-      )}
-    </>
+          </List>
+        )}
+      </SheetWrapper>
+    </Wrapper>
   );
 }
 
 export default App;
 
-const Label = styled.div`
-  display: flex;
+const Wrapper = styled.div`
+  width: 95%;
+  height: 100vh;
+  margin: auto;
+  @media (min-width: 1024px) {
+    width: 1200px;
+  }
 `;
 
 const SheetWrapper = styled.div`
   width: 100%;
-  overflow-x: scroll; /* 가로 스크롤을 활성화합니다. */
+  height: 700px;
+  margin-top: 20px;
+  overflow: scroll; /* 가로 스크롤을 활성화합니다. */
   white-space: nowrap;
-  @media (min-width: 1024px) {
-    width: 120rem;
+  border: 1px solid #e6e6e6;
+`;
+
+const Label = styled.div`
+  height: 40px;
+  display: grid;
+  grid-template-columns: 80px 80px 150px 150px 70px 200px 70px 70px 70px 70px 70px 70px 70px 70px 70px 70px 70px 70px 70px 70px 140px 160px 110px 110px 110px;
+  font-weight: 500;
+  div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-left: 1px solid #f1efef;
+    border-bottom: 1px solid #e6e6e6;
   }
+`;
+
+const List = styled.div``;
+
+const ListItem = styled.div`
+  min-height: 70px;
+  display: grid;
+  grid-template-columns: 80px 80px 150px 150px 70px 200px 70px 70px 70px 70px 70px 70px 70px 70px 70px 70px 70px 70px 70px 70px 140px 160px 110px 110px 110px;
+  align-items: center;
+  color: #595959;
+`;
+const ProfileWrapper = styled.div`
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 1px solid #e2e2e2;
+`;
+const Profile = styled.div<{ src: string }>`
+  width: 60px;
+  height: 60px;
+  border: 1px solid #e6e6e6;
+  border-radius: 100%;
+  background-image: ${({ src }) => css`url(${src})`};
+  background-size: cover;
+  background-position: center top;
+`;
+
+const ListItemData = styled.div`
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 5px;
+  white-space: break-spaces;
+  border-left: 1px solid #f1efef;
+  border-bottom: 1px solid #e2e2e2;
 `;
